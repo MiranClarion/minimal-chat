@@ -3,31 +3,31 @@
         <div class="system-prompt-card">
             <div class="prompt-header">
                 <MessageSquare size="18" class="section-icon" />
-                <h3>System Prompt</h3>
+                <h3>{{ $t('settings.systemPrompt') }}</h3>
             </div>
             <div class="prompt-content">
                 <p class="prompt-description">
-                    Guide the AI's behavior and knowledge with a system prompt. This acts as context or instructions for the AI to follow during the conversation.
+                    {{ $t('settings.systemPromptDescription') }}
                 </p>
                 <InputField labelText="" inputId="system-prompt" :value="systemPrompt"
                     @update:value="handleUpdate('systemPrompt', $event)" :isSecret="false" :isMultiline="true"
-                    :placeholderText="'You are a helpful AI assistant. You are friendly, kind, and accurate. You provide concise answers unless asked for more detail.'" />
+                    :placeholderText="$t('settings.systemPromptPlaceholder')" />
                 <div class="prompt-actions">
                     <button 
                         v-if="systemPrompt && systemPrompt.trim().length > 0" 
                         class="save-prompt-button" 
                         @click="handleSaveSystemPrompt(systemPrompt)"
-                        title="Save current prompt to your collection">
+                        title="{{ $t('settings.savePrompt') }}">
                         <Save size="16" />
-                        <span>Save Prompt</span>
+                        <span>{{ $t('buttons.save') }}</span>
                     </button>
                     <button 
                         v-if="systemPrompt && systemPrompt.trim().length > 0" 
                         class="clear-prompt-button" 
                         @click="handleUpdate('systemPrompt', '')"
-                        title="Clear the current prompt">
+                        title="{{ $t('settings.clearPrompt') }}">
                         <X size="16" />
-                        <span>Clear</span>
+                        <span>{{ $t('buttons.cancel') }}</span>
                     </button>
                 </div>
             </div>
@@ -36,7 +36,7 @@
             <div class="section-header" @click="isSavedPromptsOpen = !isSavedPromptsOpen">
                 <h4>
                     <Save size="16" class="section-icon" />
-                    Saved System Prompts
+                    {{ $t('settings.savedPrompts') }}
                 </h4>
                 <ChevronDown v-if="isSavedPromptsOpen" class="indicator" size="20" />
                 <ChevronRight v-else class="indicator" size="20" />
@@ -59,7 +59,7 @@
                     </div>
                     <div v-else class="no-prompts">
                         <MessageSquare size="24" />
-                        <p>No saved prompts yet. Enter a system prompt and it will appear here.</p>
+                        <p>{{ $t('settings.noSavedPrompts') }}</p>
                     </div>
                 </div>
             </transition>
@@ -68,7 +68,7 @@
             <div class="section-header" @click="isAccessibilityOpen = !isAccessibilityOpen">
                 <h3>
                     <Eye size="20" class="section-icon" />
-                    Accessibility
+                    {{ $t('settings.accessibility') }}
                 </h3>
                 <ChevronDown v-if="isAccessibilityOpen" class="indicator" size="20" />
                 <ChevronRight v-else class="indicator" size="20" />
@@ -76,7 +76,7 @@
             <transition name="slide-fade">
                 <div v-show="isAccessibilityOpen" class="accessibility-content">
                     <div class="control-checkbox">
-                        <SliderCheckbox inputId="higher-contrast-messages" labelText="Higher Contrast Messages"
+                        <SliderCheckbox inputId="higher-contrast-messages" :labelText="$t('settings.highContrast')"
                             v-model="higherContrastMessages" @update:modelValue="handleUpdate('higherContrastMessages', $event)" />
                     </div>
                 </div>
@@ -86,7 +86,7 @@
             <div class="section-header" @click="isAvatarSectionOpen = !isAvatarSectionOpen">
                 <h3>
                     <User size="20" class="section-icon" />
-                    Avatar Configuration
+                    {{ $t('settings.avatar') }}
                 </h3>
                 <ChevronDown v-if="isAvatarSectionOpen" class="indicator" size="20" />
                 <ChevronRight v-else class="indicator" size="20" />
@@ -94,33 +94,33 @@
             <transition name="slide-fade">
                 <div v-show="isAvatarSectionOpen" class="avatar-content">
                     <div class="enable-avatars">
-                        <SliderCheckbox inputId="enable-ai-avatar" labelText="Enable Message Avatars"
+                        <SliderCheckbox inputId="enable-ai-avatar" :labelText="$t('settings.avatarEnable')"
                             v-model="isAvatarEnabled" />
                     </div>
                     
                     <div class="avatar-settings">
                         <div class="settings-selector">
-                            <h4>Avatar Type</h4>
+                            <h4>{{ $t('settings.avatarType') }}</h4>
                             <SelectButton v-model="avatarType" :options="avatarOptions" optionLabel="name"
                                 @change="handleAvatarTypeChange" class="avatar-selector" />
                         </div>
                         
                         <div class="settings-selector">
-                            <h4>Avatar Shape</h4>
+                            <h4>{{ $t('settings.avatarShape') }}</h4>
                             <SelectButton v-model="avatarShape" :options="avatarShapes" optionLabel="name"
                                 optionValue="value" @change="handleAvatarShapeChange" class="avatar-selector" />
                         </div>
 
                         <div class="avatar-url-field">
-                            <InputField :labelText="`${avatarType.name} Image URL:`" inputId="avatar-url"
+                            <InputField :labelText="`${avatarType.name} ${$t('settings.avatarUrl')}:`" inputId="avatar-url"
                                 :value="avatarType.value === 'ai' ? avatarUrl : userAvatarUrl"
                                 @update:value="handleAvatarUrlUpdate" :isSecret="false" :isMultiline="false"
-                                :placeholderText="`Enter the URL for the ${avatarType.name} avatar image`" />
+                                :placeholderText="`${$t('settings.enterUrl')} ${avatarType.name} ${$t('settings.avatarImage')}`" />
                         </div>
                         
                         <div class="avatar-upload-section">
-                            <h4>Select an image or upload a new one</h4>
-                            <Button :label="`Upload ${avatarType.name} Avatar`" icon="pi pi-upload"
+                            <h4>{{ $t('settings.selectAvatar') }}</h4>
+                            <Button :label="$t('settings.uploadAvatar')" icon="pi pi-upload"
                                 class="custom-upload-button" @click="triggerFileInput" />
                                 
                             <div class="avatar-list-container">
@@ -136,7 +136,7 @@
                                     <template #empty>
                                         <div class="empty-list">
                                             <Image size="24" />
-                                            <p>No images uploaded yet</p>
+                                            <p>{{ $t('settings.noImages') }}</p>
                                         </div>
                                     </template>
                                 </Listbox>
@@ -180,8 +180,8 @@
 
 <script setup>
 import InputField from '@/components/controls/InputField.vue';
-import { ChevronDown, ChevronRight, Trash2, Save, User, MessageSquare, Image, Eye, X, Github, Globe } from 'lucide-vue-next';
-import { avatarShape, userAvatarUrl, isAvatarEnabled, avatarUrl, systemPrompt, selectedAutoSaveOption, higherContrastMessages } from '@/libs/state-management/state';
+import { ChevronDown, ChevronRight, Trash2, Save, User, MessageSquare, Image, Eye, X, Globe } from 'lucide-vue-next';
+import { avatarShape, userAvatarUrl, isAvatarEnabled, avatarUrl, systemPrompt, higherContrastMessages } from '@/libs/state-management/state';
 import { handleUpdate, handleDeleteSystemPrompt, handleSelectSystemPrompt, selectedSystemPromptIndex, systemPrompts, handleSaveSystemPrompt } from '@/libs/utils/settings-utils';
 import SliderCheckbox from '../controls/SliderCheckbox.vue';
 import { ref, onBeforeMount } from 'vue';

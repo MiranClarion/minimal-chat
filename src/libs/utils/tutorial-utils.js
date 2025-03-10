@@ -3,6 +3,9 @@ import { deleteCurrentConversation } from "../conversation-management/useConvers
 import { driver } from "driver.js";
 import { nextTick, computed } from "vue";
 import { saveSystemPrompt, systemPrompts } from "./settings-utils";
+import i18n from "../../i18n";
+
+const { t } = i18n.global;
 
 export async function runTutorialForSettings() {
     const hasShownUserSettingsTutorial = JSON.parse(localStorage.getItem('hasShownUserSettingsTutorial') || false);
@@ -11,22 +14,22 @@ export async function runTutorialForSettings() {
         return;
     }
 
-    systemPrompt.value = "Respond like Dale Gribble";
-    saveSystemPrompt('Respond like Dale Gribble');
+    systemPrompt.value = t('tutorial.daleGribblePrompt');
+    saveSystemPrompt(t('tutorial.daleGribblePrompt'));
     selectedModel.value = 'general-config'; // use the general section for walkthrough
 
     const settingsTutorialSteps = [
         {
             popover: {
-                title: 'Settings Quick Guide',
-                description: 'Welcome to The MinimalChat Configuration Page! Follow this short guided tour to learn about the configuration experience.'
+                title: t('tutorial.settings.title'),
+                description: t('tutorial.settings.welcome')
             }
         },
         {
             element: '.right-panel',
             popover: {
-                title: 'Mobile Gesture Support',
-                description: '1.) Double tap anywhere in the configuration panel to quickly collapse and expand the model selection panel to the left. <br><br>2.) Swipe to the right from the edge of the screen to quickly close the settings page.',
+                title: t('tutorial.settings.gestureTitle'),
+                description: t('tutorial.settings.gestureDesc'),
                 side: "top",
                 align: 'center'
             }
@@ -34,8 +37,8 @@ export async function runTutorialForSettings() {
         {
             element: '.left-panel',
             popover: {
-                title: 'Model Selection Panel',
-                description: 'Quickly select different models. The configuration panel to the right will update with the appropriate items.',
+                title: t('tutorial.settings.modelPanelTitle'),
+                description: t('tutorial.settings.modelPanelDesc'),
                 side: "right",
                 align: 'start'
             }
@@ -43,8 +46,8 @@ export async function runTutorialForSettings() {
         {
             element: '.left-panel ul li:nth-child(2)',
             popover: {
-                title: 'Model Groups',
-                description: 'Models of the same provider are grouped together for better organization. Click on a group to expand or collapse it.',
+                title: t('tutorial.settings.modelGroupsTitle'),
+                description: t('tutorial.settings.modelGroupsDesc'),
                 side: "right",
                 align: 'start'
             }
@@ -52,8 +55,8 @@ export async function runTutorialForSettings() {
         {
             element: '.left-panel ul li:nth-child(1)',
             popover: {
-                title: 'General Configuration Settings',
-                description: 'The general configuration option houses settings and actions that are more MinimalChat specific.',
+                title: t('tutorial.settings.generalConfigTitle'),
+                description: t('tutorial.settings.generalConfigDesc'),
                 side: "right",
                 align: 'start'
             }
@@ -61,8 +64,8 @@ export async function runTutorialForSettings() {
         {
             element: '.right-panel',
             popover: {
-                title: 'Configuration Section',
-                description: 'This section displays the configuration options for the selected model. Adjust settings like API keys, temperature, max tokens, and more.',
+                title: t('tutorial.settings.configSectionTitle'),
+                description: t('tutorial.settings.configSectionDesc'),
                 side: "left",
                 align: 'start'
             }
@@ -70,8 +73,8 @@ export async function runTutorialForSettings() {
         {
             element: '.system-prompt-container',
             popover: {
-                title: 'System Prompt',
-                description: 'Enter a system prompt if you desire. This prompt will be used by the model to guide its responses.',
+                title: t('tutorial.settings.systemPromptTitle'),
+                description: t('tutorial.settings.systemPromptDesc'),
                 side: "left",
                 align: 'start'
             }
@@ -79,8 +82,8 @@ export async function runTutorialForSettings() {
         {
             element: '.saved-system-prompts',
             popover: {
-                title: 'Saved System Prompts',
-                description: 'View and manage your saved system prompts here. Click on a prompt to select it, or click the trash icon to delete it.',
+                title: t('tutorial.settings.savedPromptsTitle'),
+                description: t('tutorial.settings.savedPromptsDesc'),
                 side: "left",
                 align: 'start'
             }
@@ -88,8 +91,8 @@ export async function runTutorialForSettings() {
         {
             element: '.control-checkbox',
             popover: {
-                title: 'Higher Contrast Messages',
-                description: 'Enable or disable higher contrast messages for more distinction between messages. This results in a more classic message bubble design.',
+                title: t('tutorial.settings.contrastTitle'),
+                description: t('tutorial.settings.contrastDesc'),
                 side: "left",
                 align: 'start'
             }
@@ -97,16 +100,16 @@ export async function runTutorialForSettings() {
         {
             element: '.config-section',
             popover: {
-                title: 'Import/Export Configuration',
-                description: 'Manage your settings by exporting them to a JSON file for backup or importing settings from a JSON file.',
+                title: t('tutorial.settings.importExportTitle'),
+                description: t('tutorial.settings.importExportDesc'),
                 side: "left",
                 align: 'start'
             }
         },
         {
             popover: {
-                title: 'Walkthrough Finished!',
-                description: 'Thanks for following the walkthrough!'
+                title: t('tutorial.settings.finishedTitle'),
+                description: t('tutorial.settings.finishedDesc')
             }
         }
     ];
@@ -140,40 +143,40 @@ export async function runTutortialForNewUser() {
     const hasShownUserTutorial = JSON.parse(localStorage.getItem('hasShownUserTutorial') || false);
 
     const mobileTutorialSteps = [
-        { popover: { title: 'MinimalChat Tutorial', description: 'Welcome to MinimalChat! Follow this quick guided tour to learn about the app. It highlights useful information, features, and gestures!' } },
-        { element: '.settings-btn', popover: { title: 'Configuration Page', description: 'Visit the configuration page to set up various LLM models and services!' } },
-        { element: '#settings-dialog', popover: { title: 'Swipe Right', description: 'Access the Configuration page quickly by swiping right from the edge of the screen!', side: "top", align: 'start' } },
-        { element: '#conversations-dialog', popover: { title: 'Swipe Left', description: 'Access the Conversations Management page quickly by swiping left from the edge of the screen!', side: "top", align: 'start' } },
-        { element: '#message-0', popover: { title: 'Edit Previous Messages', description: 'Double-click any user message in the conversation to enter edit mode and regenerate the response!' } },
-        { element: '.gpt .label', popover: { title: 'Copy Message Text', description: 'Tap the label of any message to quickly copy the text to your clipboard.' } },
-        { element: '.context-menu', popover: { title: 'Quick Actions Menu', description: 'Doubelt tap the messages list to open a quick actions menu for deleting or starting a new conversation.', side: "top", align: 'start' } },
-        { element: '.image-button', popover: { title: 'Initiate Vision Requests', description: 'Start a Vision request by entering your prompt and choosing an image via the upload button!' } },
-        { element: '.upload-button', popover: { title: 'Upload Files', description: 'Easily add the contents of valid files to the current conversation context.' } },
-        { element: '.header-icon', popover: { title: 'Have an Idea or Issue?', description: 'Click the header icon to navigate to the GitHub repo where you can submit issues or ideas!' } },
-        { popover: { title: 'Tutorial Complete!', description: 'Thanks for following the tutorial! Dive in and start using the app however you like. Happy chatting!' } }
+        { popover: { title: t('tutorial.main.title'), description: t('tutorial.main.welcome') } },
+        { element: '.settings-btn', popover: { title: t('tutorial.main.configTitle'), description: t('tutorial.main.configDesc') } },
+        { element: '#settings-dialog', popover: { title: t('tutorial.main.swipeRightTitle'), description: t('tutorial.main.swipeRightDesc'), side: "top", align: 'start' } },
+        { element: '#conversations-dialog', popover: { title: t('tutorial.main.swipeLeftTitle'), description: t('tutorial.main.swipeLeftDesc'), side: "top", align: 'start' } },
+        { element: '#message-0', popover: { title: t('tutorial.main.editMsgTitle'), description: t('tutorial.main.editMsgDesc') } },
+        { element: '.gpt .label', popover: { title: t('tutorial.main.copyMsgTitle'), description: t('tutorial.main.copyMsgDesc') } },
+        { element: '.context-menu', popover: { title: t('tutorial.main.quickActionsTitle'), description: t('tutorial.main.quickActionsDesc'), side: "top", align: 'start' } },
+        { element: '.image-button', popover: { title: t('tutorial.main.visionTitle'), description: t('tutorial.main.visionDesc') } },
+        { element: '.upload-button', popover: { title: t('tutorial.main.uploadTitle'), description: t('tutorial.main.uploadDesc') } },
+        { element: '.header-icon', popover: { title: t('tutorial.main.githubTitle'), description: t('tutorial.main.githubDesc') } },
+        { popover: { title: t('tutorial.main.completeTitle'), description: t('tutorial.main.completeDesc') } }
     ];
 
     const desktopTutorialSteps = [
-        { popover: { title: 'MinimalChat Walkthrough', description: 'Welcome to MinimalChat! Follow this quick guided tour to learn about the app. It highlights useful information, features, and gestures!' } },
-        { element: '#quick-select-model-selector', popover: { title: 'Quickly Change Models', description: 'In the desktop layout, you can quickly switch the model being used for requests.' } },
-        { element: '.sidebar-conversations', popover: { title: 'Conversations Panel', description: 'This area displays saved conversations and actions for managing them.', side: "top", align: 'start' } },
-        { element: '#conversation-0', popover: { title: 'Edit Conversation Titles', description: 'Double-click a saved conversation to activate edit mode and change the conversation title.', side: "top", align: 'start' } },
-        { element: '.settings-icon', popover: { title: 'Configuration Page', description: 'Visit the configuration page to set up various LLM models and services!' } },
-        { element: '#message-0', popover: { title: 'Edit Previous Messages', description: 'Double-click any user message in the conversation to enter edit mode and regenerate the response!' } },
-        { element: '.gpt .label', popover: { title: 'Copy Message Text', description: 'Tap the label of any message to quickly copy the text to your clipboard.' } },
-        { element: '.image-button', popover: { title: 'Initiate Vision Requests', description: 'Start a Vision request by entering your prompt and choosing an image via the upload button!' } },
-        { element: '.upload-button', popover: { title: 'Upload Files', description: 'Easily add the contents of valid files (non-images, etc.) to the current conversation context.' } },
-        { element: '.header-icon', popover: { title: 'Have an Idea or Issue?', description: 'Click the header icon to navigate to the GitHub repo where you can submit issues or ideas!' } },
-        { popover: { title: 'Tutorial Complete!', description: 'Thanks for following the tutorial! Dive in and start using the app however you like. Happy chatting!' } }
+        { popover: { title: t('tutorial.desktop.title'), description: t('tutorial.desktop.welcome') } },
+        { element: '#quick-select-model-selector', popover: { title: t('tutorial.desktop.modelSelectorTitle'), description: t('tutorial.desktop.modelSelectorDesc') } },
+        { element: '.sidebar-conversations', popover: { title: t('tutorial.desktop.conversationsTitle'), description: t('tutorial.desktop.conversationsDesc'), side: "top", align: 'start' } },
+        { element: '#conversation-0', popover: { title: t('tutorial.desktop.editTitleTitle'), description: t('tutorial.desktop.editTitleDesc'), side: "top", align: 'start' } },
+        { element: '.settings-icon', popover: { title: t('tutorial.desktop.configTitle'), description: t('tutorial.desktop.configDesc') } },
+        { element: '#message-0', popover: { title: t('tutorial.desktop.editMsgTitle'), description: t('tutorial.desktop.editMsgDesc') } },
+        { element: '.gpt .label', popover: { title: t('tutorial.desktop.copyMsgTitle'), description: t('tutorial.desktop.copyMsgDesc') } },
+        { element: '.image-button', popover: { title: t('tutorial.desktop.visionTitle'), description: t('tutorial.desktop.visionDesc') } },
+        { element: '.upload-button', popover: { title: t('tutorial.desktop.uploadTitle'), description: t('tutorial.desktop.uploadDesc') } },
+        { element: '.header-icon', popover: { title: t('tutorial.desktop.githubTitle'), description: t('tutorial.desktop.githubDesc') } },
+        { popover: { title: t('tutorial.desktop.completeTitle'), description: t('tutorial.desktop.completeDesc') } }
     ];
 
     // Add a temporary placeholder conversation item
     const placeholderConversation = {
         id: '0',
-        title: 'Example Conversation',
+        title: t('tutorial.exampleTitle'),
         messageHistory: [
-            { id: 0, role: 'user', content: 'This is an example saved conversation item.' },
-            { id: 1, role: 'assistant', content: 'Feel free to explore and add your own conversations.' }
+            { id: 0, role: 'user', content: t('tutorial.exampleUser') },
+            { id: 1, role: 'assistant', content: t('tutorial.exampleAssistant') }
         ]
     };
 
