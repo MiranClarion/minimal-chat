@@ -32,25 +32,28 @@ const getAllImageFiles = (dir) => {
 const generateIcons = async () => {
   const imagesDir = path.resolve(__dirname, 'public/images');
   const files = getAllImageFiles(imagesDir);
-  const icons = await Promise.all(files.map(async (file) => {
-    try {
-      const metadata = await sharp(file).metadata();
-      const { width, height, format } = metadata;
-      if (width === height && format === 'png') {
-        const icon = {
-          src: path.relative(path.resolve(__dirname, 'public'), file).replace(/\\/g, '/'),
-          sizes: `${width}x${height}`,
-          type: 'image/png'
-        };
-        if (file.includes('maskable')) {
-          icon.purpose = 'maskable';
+  const icons = await Promise.all(files
+    // 只处理 png 和 jpg 格式的文件
+    .filter(file => /\.(png|jpg|jpeg)$/i.test(file))
+    .map(async (file) => {
+      try {
+        const metadata = await sharp(file).metadata();
+        const { width, height, format } = metadata;
+        if (width === height && format === 'png') {
+          const icon = {
+            src: path.relative(path.resolve(__dirname, 'public'), file).replace(/\\/g, '/'),
+            sizes: `${width}x${height}`,
+            type: 'image/png'
+          };
+          if (file.includes('maskable')) {
+            icon.purpose = 'maskable';
+          }
+          return icon;
         }
-        return icon;
+      } catch (error) {
+        console.warn(`跳过非图像文件 ${file}`);
       }
-    } catch (error) {
-      console.error(`Error processing file ${file}:`, error);
-    }
-  }));
+    }));
   return icons.filter(Boolean);
 };
 

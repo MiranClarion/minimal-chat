@@ -148,13 +148,39 @@
                 </div>
             </transition>
         </div>
+        <div class="config-section">
+            <div class="section-header" @click="isLanguageSettingsOpen = !isLanguageSettingsOpen">
+                <h3>
+                    <Globe class="section-icon" :size="18" />
+                    {{ $t('settings.language') }}
+                </h3>
+                <div class="card-actions">
+                    <ChevronDown v-if="isLanguageSettingsOpen" />
+                    <ChevronRight v-else />
+                </div>
+            </div>
+            <transition name="slide-fade">
+                <div class="card-content" v-show="isLanguageSettingsOpen">
+                    <div class="language-options">
+                        <div class="dropdown-container">
+                            <label for="language-select">{{ $t('settings.selectLanguage') }}:</label>
+                            <Dropdown id="language-select" :options="languageOptions" 
+                                    v-model="selectedLanguage" 
+                                    optionLabel="label" 
+                                    optionValue="value"
+                                    @change="changeLanguage" />
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>
 
 
 <script setup>
 import InputField from '@/components/controls/InputField.vue';
-import { ChevronDown, ChevronRight, Trash2, Save, User, MessageSquare, Image, Eye, X, Github } from 'lucide-vue-next';
+import { ChevronDown, ChevronRight, Trash2, Save, User, MessageSquare, Image, Eye, X, Github, Globe } from 'lucide-vue-next';
 import { avatarShape, userAvatarUrl, isAvatarEnabled, avatarUrl, systemPrompt, selectedAutoSaveOption, higherContrastMessages } from '@/libs/state-management/state';
 import { handleUpdate, handleDeleteSystemPrompt, handleSelectSystemPrompt, selectedSystemPromptIndex, systemPrompts, handleSaveSystemPrompt } from '@/libs/utils/settings-utils';
 import SliderCheckbox from '../controls/SliderCheckbox.vue';
@@ -162,6 +188,22 @@ import { ref, onBeforeMount } from 'vue';
 import { storeFileData } from '@/libs/file-processing/image-analysis';
 import { showToast } from '@/libs/utils/general-utils';
 import { fetchStoredImageFiles } from '@/libs/utils/indexed-db-utils';
+import { useI18n } from 'vue-i18n';
+import Dropdown from 'primevue/dropdown';
+
+const { locale } = useI18n();
+const isLanguageSettingsOpen = ref(false);
+const selectedLanguage = ref(locale.value);
+
+const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: '中文', value: 'zh-CN' }
+];
+
+function changeLanguage(event) {
+  locale.value = event.value;
+  localStorage.setItem('lang', event.value);
+}
 
 const storedFiles = ref([]);
 const selectedFile = ref(null);
