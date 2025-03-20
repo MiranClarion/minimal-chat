@@ -7,6 +7,8 @@ import viteImagemin from 'vite-plugin-imagemin';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import lightningcss from 'vite-plugin-lightningcss';
+
 
 // Get the directory name in ESM
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -76,42 +78,47 @@ const formatTagScreenshots = [
 ];
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig(async ({ mode }) => ({
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'primevue', 'primeicons'],
+    exclude: ['@mlc-ai/web-llm'], // 如果该依赖未预构建
+    esbuildOptions: {
+      target: 'es2022',
+      logLevel: 'error',
+    },
+  },
+
   plugins: [
     vue(),
-    viteImagemin({
-      gifsicle: {
-        optimizationLevel: 7,
-        interlaced: false,
-      },
-      optipng: {
-        optimizationLevel: 7,
-      },
-      mozjpeg: {
-        quality: 20,
-      },
-      pngquant: {
-        quality: [0.65, 0.9],
-        speed: 4,
-      },
-      svgo: {
-        plugins: [
-          {
-            name: 'removeViewBox',
-          },
-          {
-            name: 'removeEmptyAttrs',
-            active: false,
-          },
-        ],
-      },
-    }),
+    lightningcss(),
+
+    // 生产环境专属插件
+    ...(mode === 'production'
+      ? [
+        viteImagemin({ // 图片压缩插件
+          gifsicle: { optimizationLevel: 7, interlaced: false },
+          optipng: { optimizationLevel: 7 },
+          mozjpeg: { quality: 20 },
+          pngquant: { quality: [0.65, 0.9], speed: 4 },
+          svgo: {
+            plugins: [
+              { name: 'removeViewBox' },
+              { name: 'removeEmptyAttrs', active: false }
+            ]
+          }
+        })
+      ]
+      : []
+    ),
+
     VueDevTools(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
       workbox: {
         maximumFileSizeToCacheInBytes: 8000000,
+        globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg,gif,webp,woff,woff2,eot,ttf,otf,json,xml}'],
+        globIgnores: ['**/node_modules/**', '**/dist/**'],
         runtimeCaching: [
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
@@ -196,35 +203,73 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // 添加以下两行
+      'primevue': path.resolve(__dirname, 'node_modules/primevue'),
+      'primeicons': path.resolve(__dirname, 'node_modules/primeicons')
     }
   },
   build: {
-    minify: 'terser', // Use Terser for more advanced minification
+    // JS 压缩配置（保留原有 Terser 配置）
+    minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console logs for smaller bundle size
-        drop_debugger: true, // Remove debugger statements
-        ecma: 2020, // Use modern ECMAScript features
-        module: true,
-        toplevel: true,
-        passes: 10, // Multiple passes for better compression
+        drop_console: true,
+        drop_debugger: true,
+        ecma: 2022, // 升级到更高 ECMAScript 版本
+        // 开发环境禁用复杂压缩
+        module: false,
+        toplevel: false,
+        passes: 3, // 减少压缩次数
       },
+      mangle: false, // 禁用变量名混淆
       format: {
-        comments: false, // Remove comments
-      },
+        comments: false
+      }
     },
-    target: 'esnext', // Target modern browsers for smaller bundle size
-    cssCodeSplit: true, // Enable CSS code splitting
-    sourcemap: false, // Disable source maps for production build
-    chunkSizeWarningLimit: 500, // Increase chunk size warning limit
+
+    // 基础构建配置
+    target: 'esnext',
+    sourcemap: false,
+    chunkSizeWarningLimit: 500, // 可删除，与默认值相同
+
+    // CSS 相关配置
+    cssCodeSplit: true, // 启用 CSS 分割
+    // 无需设置 cssMinify，由 lightningcss 插件处理
+
+    // 压缩和报告
+    brotliSize: true,
+    reportCompressedSize: false, // 移除冗余配置（需确保未安装其他插件）
+
+    // 代码分割策略
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
-          }
-        },
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router'],
+          'ui-vendor': ['primevue', 'primeicons'],
+          'web-llm': ['@mlc-ai/web-llm'],
+          'utils': [ // 修正路径格式
+            './src/libs/utils/general-utils.js',
+            './src/libs/utils/settings-utils.js'
+          ],
+          'conversation-mgmt': [
+            './src/libs/conversation-management/conversations-management.js',
+            './src/libs/conversation-management/message-processing.js',
+            './src/libs/conversation-management/useConversations.js'
+          ]
+        }
       },
+
+      // 启用 Rollup 缓存（减少重复构建时间）
+      cache: {
+        dir: path.resolve(__dirname, '.vite_cache')
+      }
+    }
+  },
+
+  server: {
+    hmr: {
+      overlay: false, // 隐藏错误弹窗（减少渲染开销）
+      clientLogger: 'none', // 禁用 HMR 日志
     },
   },
 }));
