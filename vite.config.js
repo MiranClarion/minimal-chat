@@ -89,7 +89,17 @@ export default defineConfig(async ({ mode }) => ({
   },
 
   plugins: [
-    vue(),
+    // Vue 特定优化 静态提升
+    vue({
+      template: {
+        // 启用静态提升，减少运行时开销
+        compilerOptions: {
+          hoistStatic: true,
+          cacheHandlers: true
+        }
+      }
+    }),
+
     lightningcss(),
 
     // 生产环境专属插件
@@ -203,7 +213,6 @@ export default defineConfig(async ({ mode }) => ({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // 添加以下两行
       'primevue': path.resolve(__dirname, 'node_modules/primevue'),
       'primeicons': path.resolve(__dirname, 'node_modules/primeicons')
     }
@@ -243,20 +252,43 @@ export default defineConfig(async ({ mode }) => ({
     // 代码分割策略
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vue-vendor': ['vue', 'vue-router'],
-          'ui-vendor': ['primevue', 'primeicons'],
-          'web-llm': ['@mlc-ai/web-llm'],
-          'utils': [ // 修正路径格式
-            './src/libs/utils/general-utils.js',
-            './src/libs/utils/settings-utils.js'
-          ],
-          'conversation-mgmt': [
-            './src/libs/conversation-management/conversations-management.js',
-            './src/libs/conversation-management/message-processing.js',
-            './src/libs/conversation-management/useConversations.js'
-          ]
-        }
+        manualChunks(id) {
+          // 先处理特定模块
+          if (id.includes('src/libs/utils')) {
+            return 'utils';
+          }
+
+          if (id.includes('src/libs/conversation-management')) {
+            return 'conversation-mgmt';
+          }
+
+          // Vue 相关依赖
+          if (id.includes('node_modules/vue') || id.includes('node_modules/vue-router')) {
+            return 'vue-vendor';
+          }
+
+          // UI 库相关依赖
+          if (id.includes('node_modules/primevue') || id.includes('node_modules/primeicons')) {
+            return 'ui-vendor';
+          }
+
+          // WebLLM 相关依赖
+          if (id.includes('node_modules/@mlc-ai/web-llm')) {
+            return 'web-llm';
+          }
+
+          // 其他 node_modules 依赖自动分组
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString();
+          }
+        },
+
+        // 自动处理依赖
+        // manualChunks(id) {
+        //   if (id.includes('node_modules')) {
+        //     return id.toString().split('node_modules/')[1].split('/')[0].toString();
+        //   }
+        // },
       },
 
       // 启用 Rollup 缓存（减少重复构建时间）
